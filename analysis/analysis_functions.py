@@ -8,6 +8,7 @@ import scipy.constants as sci
 from copy import deepcopy
 from scipy.signal import find_peaks
 from scipy.integrate import simpson
+from scipy import stats
 
 ### Loads calibration (hard coded for now): 
 cal_wavel, cal_values = ([],[])
@@ -252,3 +253,18 @@ def interpolate_gaps(values, limit=None):
         filled[invalid] = np.nan
 
     return filled
+
+
+
+def ideality_fit(QFLS, num_suns, sunmin, sunmax):
+    lnmin = np.log(sunmin)
+    lnmax = np.log(sunmax)
+
+    ln_curr =  np.log(num_suns)
+    
+    minindex = np.argmin(abs(ln_curr-lnmin))
+    maxindex = np.argmin(abs(ln_curr-lnmax))
+
+    m,c = stats.linregress(ln_curr[minindex:maxindex], QFLS[minindex:maxindex])[0:2]
+    return sci.e*m/(sci.k*293), (m,c)
+            

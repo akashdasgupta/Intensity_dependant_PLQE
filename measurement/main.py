@@ -7,6 +7,8 @@ from Shutter import *
 import csv
 import os
 
+detector_effective_bits = 17.65 # max here
+
 shutter = Shutter()
 pm = PowerMeter()
 wheel = Wheel(pm, shutter)
@@ -22,63 +24,32 @@ wavel = spec.update_wls()
 
 ##############
 
-num_points = 20
+num_points = 19
 division = 30 # in moter steps 
 timewait = 1
-savepath = './test'
+savepath = './test4_2'
 
 ###############
 
 def integration_from_f(f):
-    return 100
+    return 50
 
 for i in ['short', 'long', 'dark_s', 'dark_l']:
     for j in ['in', 'out', 'empty']:
         if not os.path.isdir(f"{savepath}/{j}/{i}"):
             os.makedirs(f"{savepath}/{j}/{i}")
 
-'''
-index = []
-powers = []
-
-for i in range(num_points):    
-
-    for _ in range(division):
-        wheel.f()
-
-    shutter.on()
-    power = pm.read()[0]
-    powers.append(power)
-    print(power)
-    index.append(i)
-    time.sleep(1)
-
-for i in range(num_points):    
-
-    for _ in range(division):
-        wheel.r()
-
-    shutter.on()
-    power = pm.read()[0]
-    powers.append(power)
-    index.append(num_points-i)
-    time.sleep(1)
-
-shutter.off()
 
 
-with open('newtest2.csv','w', newline='') as file:
-    writer = csv.writer(file)
-    writer.writerows(zip(index, powers))
-
-
-'''
 for j in ['in', 'out', 'empty']:
+    int_time_short = 50
+    int_time_long = 5000
+
     input(f'Place the sample in the {j} position')
     for i in range(num_points):    
         for _ in range(division):
             wheel.f()
-        int_time = integration_from_f(i*division)
+        
         shutter.on()
         power = pm.read()[0]
         print(i,power)
@@ -86,35 +57,46 @@ for j in ['in', 'out', 'empty']:
 
         shutter.on()
         ### short
-        spec.integration_time_ms = int_time
+
+
+        spec.integration_time_ms = int_time_short
         time.sleep(timewait)
         counts = spec.get_counts()
-        save_spec(f"{savepath}/{j}/short", wavel, counts, power, int_time)
+
+        while np.max(counts) >= (2**detector_effective_bits) * 0.8:
+            int_time_short = int(0.8 * int_time_short)
+            spec.integration_time_ms = int_time_short
+            time.sleep(timewait)
+            counts = spec.get_counts()
+
+        save_spec(f"{savepath}/{j}/short", wavel, counts, power, int_time_short)
 
         ### long 
-        spec.integration_time_ms = int_time*50
+        spec.integration_time_ms = int_time_long
         time.sleep(timewait)
         counts = spec.get_counts()
-        save_spec(f"{savepath}/{j}/long", wavel, counts, power, int_time*50)
+        save_spec(f"{savepath}/{j}/long", wavel, counts, power, int_time_long)
 
         shutter.off()
         
         ### short
-        spec.integration_time_ms = int_time
+        spec.integration_time_ms = int_time_short
         time.sleep(timewait)
         counts = spec.get_counts()
-        save_spec(f"{savepath}/{j}/dark_s", wavel, counts, power, int_time)
+        save_spec(f"{savepath}/{j}/dark_s", wavel, counts, power, int_time_short)
 
         ### long 
-        spec.integration_time_ms = int_time*50
+        spec.integration_time_ms = int_time_long
         time.sleep(timewait)
         counts = spec.get_counts()
-        save_spec(f"{savepath}/{j}/dark_l", wavel, counts, power, int_time*50)
+        save_spec(f"{savepath}/{j}/dark_l", wavel, counts, power, int_time_long)
     
     
     for _ in range(num_points):
         for _ in range(division):
             wheel.r()
+    
+    pm.read()[0]
 
 
 

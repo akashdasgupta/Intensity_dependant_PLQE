@@ -9,6 +9,8 @@ class Wheel():
         self.rcom = b'\x72'
         self.initial_step_range = 30
 
+        self.serial_device.baudrate = 115200
+
         initial_power = pm.read()[0]
 
         shutter.on()
@@ -20,7 +22,8 @@ class Wheel():
             if initial_power > current_power and abs(initial_power-current_power)/initial_power > 0.2:
                 break
             initial_power = current_power
-
+        for _ in range(self.initial_step_range):
+            self.f()
         time.sleep(3)
         self.zero = pm.read()[0]
         shutter.off()

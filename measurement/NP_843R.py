@@ -19,18 +19,24 @@ class PowerMeter():
                 print(f'No Sensor attached to {Device} !!!')
                 self.DeviceHandle = None
                 break
-        self.COM.StartStream(self.DeviceHandle, 0)
+        
     
     def read(self):
+        self.COM.StartStream(self.DeviceHandle, 0)
         time.sleep(.2)				# wait a little for data
+        data = self.COM.GetData(self.DeviceHandle, 0)
+        data = self.COM.GetData(self.DeviceHandle, 0)
         data = self.COM.GetData(self.DeviceHandle, 0)
         while len(data[0]) == 0:
             data = self.COM.GetData(self.DeviceHandle, 0)
-            time.sleep(3)
+            time.sleep(.2)
             data = self.COM.GetData(self.DeviceHandle, 0)
         reading = float(data[0][0])
         timestap = float(data[1][0])
         status = data[2][0]
+
+        self.COM.StopAllStreams()
+        # self.COM.CloseAll()
         return reading, timestap, status
 
     def close():

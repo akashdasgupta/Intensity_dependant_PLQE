@@ -61,7 +61,7 @@ class QEPro(object):
 def noise_calibrate(spec):
     wavel = spec.update_wls()
 
-    for int_time in np.logspace(3,4,3):
+    for int_time in np.logspace(1,4,10):
         spec.integration_time_ms = int(int_time)
         print(int(int_time))
         holder = []

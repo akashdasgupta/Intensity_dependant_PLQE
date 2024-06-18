@@ -8,7 +8,7 @@ import time
 
 class Shutter():
     def __init__(self):
-        self.serial_device = serial.Serial("COM4")
+        self.serial_device = serial.Serial("COM5")
         self.opencommand = [255, 1,1]
         self.closecommand = [255, 1,0]
     def on(self):

@@ -18,7 +18,7 @@ cpal = ["#b30000", "#7c1158", "#4421af", "#1a53ff", "#0d88e6", "#00b7c7", "#5ad4
 ### Loads calibration (hard coded for now): 
 cal_wavel, cal_values = ([],[])
 
-with open(f".\calibration_data\cal_QEpro_steel_200um_2022-05-05.txt",'r') as file:
+with open(f".\calibration_data\cal_QEpro2_steel_50um_slit200um_2023-01-18.txt",'r') as file:
     reader = csv.reader(file, delimiter = ' ')
     for row in reader:
         cal_wavel.append(float(row[0]))

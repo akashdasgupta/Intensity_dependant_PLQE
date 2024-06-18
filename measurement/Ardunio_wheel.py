@@ -3,8 +3,8 @@ from NP_843R import *
 from Shutter import *
 import csv
 class Wheel():
-    def __init__(self, pm, shutter):
-        self.serial_device = serial.Serial("COM7",  baudrate=115200)
+    def __init__(self, pm, shutter, rezero=True):
+        self.serial_device = serial.Serial("COM4",  baudrate=115200)
         self.fcom = b'\x66'
         self.rcom = b'\x72'
         self.initial_step_range = 30
@@ -13,22 +13,29 @@ class Wheel():
 
         initial_power = pm.read()[0]
 
-        shutter.on()
-        while True:
+        if rezero:
+            shutter.on()
+            while True:
+                for _ in range(self.initial_step_range):
+                    self.f()
+                current_power = pm.read()[0]
+                print(current_power)
+                if initial_power > current_power and abs(initial_power-current_power)/initial_power > 0.2:
+                    break
+                initial_power = current_power
             for _ in range(self.initial_step_range):
                 self.f()
-            current_power = pm.read()[0]
-            print(current_power)
-            if initial_power > current_power and abs(initial_power-current_power)/initial_power > 0.2:
-                break
-            initial_power = current_power
-        for _ in range(self.initial_step_range):
-            self.f()
-        time.sleep(3)
-        self.zero = pm.read()[0]
-        shutter.off()
+            time.sleep(3)
+            self.zero = pm.read()[0]
+            shutter.off()
+        else:
+            shutter.on()
+            self.zero = pm.read()[0]
+            self.zero = pm.read()[0]
+            shutter.off()
 
-        print('DONE CALIBRATION!!!!', self.zero)
+
+        print('DONE CALIBRATION!!!!')#, self.zero)
 
     def f(self):
         self.serial_device.write(b'\x66')

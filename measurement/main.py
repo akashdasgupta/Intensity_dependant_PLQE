@@ -18,18 +18,20 @@ def save_spec(savepath, wavel, counts, power='UNKNOWN',integration='UNKNOWN'):
         writer = csv.writer(file)
         writer.writerows(zip(wavel,counts))
 
-
+#
 spec = QEPro()
 wavel = spec.update_wls()
 
 ##############
 
 num_points = 19
-division = 30 # in moter steps 
-timewait = 1
-savepath = r'\\cmfs1.physics.ox.ac.uk\cm\akashdasgupta\int_plqe\Flo\21_12_2022_Krad\1A-aged'
+division = 30 # in motor steps 
+skip = 2
 
-PL_ref_position = 1000
+timewait = 1
+savepath = r"Y:\DAQ\CondensedMatterGroups\Rest-Of-CM-DAQ-Groups\HJSGroup\Krish_Int dependent PLQE\Evap CsPbI2Br with 5% PbCl2 and 100deg T_50 nm\Unannealed\A"
+
+PL_ref_position = 1000 # what is this?? <- don't ask me...
 ###############
 
 
@@ -42,14 +44,18 @@ for i in ['short', 'long', 'dark_s', 'dark_l']:
 
 min_int_time, max_int_time = spec.integration_time_limits
 
+
 for j in ['in', 'out', 'empty']:
     int_time_short = 50
-    int_time_long = 10000
+    int_time_long = 5000
 
     input(f'Place the sample in the {j} position')
     for i in range(num_points):    
         for _ in range(division):
             wheel.f()
+        if i <= skip:
+            time.sleep(1) 
+            continue 
         
         shutter.on()
         time.sleep(1) # gives time for shutter to open before power read
